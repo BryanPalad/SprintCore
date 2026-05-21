@@ -1,14 +1,22 @@
 import { Bolt, Lock, Mail } from "lucide-react";
+import axios from "axios";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { signInHighlights, signInSocialProviders } from "@/features/auth/data";
 import { SocialButton } from "@/features/auth/components/SocialButton";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
+import { useToast } from "@/hooks/useToast";
 import { useForm } from "react-hook-form";
 import { signInSchema, type SignInFormData } from "./validation";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useLoginMutation } from "./hooks/useLoginMutation";
 
 export function SignInView() {
+  const navigate = useNavigate();
+  const toast = useToast();
+  const loginMutation = useLoginMutation();
+
   const {
     register,
     handleSubmit,
@@ -16,7 +24,20 @@ export function SignInView() {
   } = useForm<SignInFormData>({ resolver: zodResolver(signInSchema) });
 
   const onSubmit = (data: SignInFormData) => {
-    console.log(data);
+    loginMutation.mutate(data, {
+      onSuccess: () => {
+        toast.success("Successfully signed in");
+        navigate("/dashboard", { replace: true });
+      },
+      onError: (error) => {
+        if (axios.isAxiosError<{ message?: string }>(error)) {
+          toast.error(error.response?.data?.message ?? "Invalid email or password");
+          return;
+        }
+
+        toast.error("Something went wrong");
+      },
+    });
   };
 
   return (
@@ -112,10 +133,11 @@ export function SignInView() {
                 </div>
 
                 <button
-                  className="w-full rounded-xl bg-gradient-to-r from-brand-primary to-brand-tertiary py-4 text-sm font-bold tracking-[0.02em] text-white shadow-lg shadow-brand-primary/20 transition-all duration-200 hover:scale-[1.02] active:scale-95"
+                  className="w-full rounded-xl bg-gradient-to-r from-brand-primary to-brand-tertiary py-4 text-sm font-bold tracking-[0.02em] text-white shadow-lg shadow-brand-primary/20 transition-all duration-200 hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
+                  disabled={loginMutation.isPending}
                   type="submit"
                 >
-                  Sign In to SprintCore
+                  {loginMutation.isPending ? "Signing in..." : "Sign In to SprintCore"}
                 </button>
               </form>
 

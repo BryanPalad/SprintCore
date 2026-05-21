@@ -1,15 +1,12 @@
-import { Navigate, Route, Routes } from "react-router-dom";
-import { RegisterView } from "@/features/auth/RegisterView";
-import { SignInView } from "@/features/auth/SignInView";
-import { LandingPage } from "@/features/landing/LandingPage";
+import { RouterProvider } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+import { router } from "@/routes/router";
 
 export default function App() {
   return (
-    <Routes>
-      <Route element={<LandingPage />} path="/" />
-      <Route element={<SignInView />} path="/login" />
-      <Route element={<RegisterView />} path="/register" />
-      <Route element={<Navigate replace to="/" />} path="*" />
-    </Routes>
+    <>
+      <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
+      <RouterProvider router={router} />
+    </>
   );
 }

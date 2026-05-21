@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { prisma } from "../config/prisma.js";
+import type { AuthRequest } from "../middleware/auth.middleware.js";
 
 type PasswordResetJwtPayload = {
   userId: number;
@@ -10,6 +11,8 @@ type PasswordResetJwtPayload = {
 };
 
 const PASSWORD_RESET_TOKEN_EXPIRATION = "15m";
+const ACCESS_TOKEN_COOKIE_NAME = "accessToken";
+const ACCESS_TOKEN_COOKIE_MAX_AGE = 1000 * 60 * 60 * 24 * 7;
 
 const getJwtSecret = (): string | null => {
   return process.env.JWT_SECRET ?? null;
@@ -89,9 +92,15 @@ export const login = async (req: Request, res: Response) => {
       { expiresIn: "7d" },
     );
 
+    res.cookie(ACCESS_TOKEN_COOKIE_NAME, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: ACCESS_TOKEN_COOKIE_MAX_AGE,
+    });
+
     return res.status(200).json({
       message: "Login successful",
-      token,
       user: {
         id: user.id,
         name: user.name,
@@ -101,6 +110,42 @@ export const login = async (req: Request, res: Response) => {
   } catch (error) {
     return res.status(500).json({ message: "Login Failed" });
   }
+};
+
+export const me = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        createdAt: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    return res.status(200).json({ user });
+  } catch {
+    return res.status(500).json({ message: "Failed to fetch authenticated user" });
+  }
+};
+
+export const logout = async (_req: Request, res: Response) => {
+  res.clearCookie(ACCESS_TOKEN_COOKIE_NAME, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+  });
+
+  return res.status(200).json({ message: "Logout successful" });
 };
 
 export const forgotPassword = async (req: Request, res: Response) => {

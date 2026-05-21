@@ -1,8 +1,15 @@
+import { Navigate, Route, Routes } from "react-router-dom";
+import { RegisterView } from "@/features/auth/RegisterView";
+import { SignInView } from "@/features/auth/SignInView";
+import { LandingPage } from "@/features/landing/LandingPage";
+
 export default function App() {
   return (
-    <main className="mx-auto max-w-3xl p-6">
-      <h1 className="text-2xl font-semibold">Sprint Core Frontend</h1>
-      <p className="mt-2 text-sm text-neutral-600">Base app is ready for shadcn/ui setup.</p>
-    </main>
+    <Routes>
+      <Route element={<LandingPage />} path="/" />
+      <Route element={<SignInView />} path="/login" />
+      <Route element={<RegisterView />} path="/register" />
+      <Route element={<Navigate replace to="/" />} path="*" />
+    </Routes>
   );
 }

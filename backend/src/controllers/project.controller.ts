@@ -40,3 +40,26 @@ export const createProject = async (req: AuthRequest, res: Response) => {
     return res.status(500).json({ message: "Failed to create project", error });
   }
 };
+
+export const deleteProject = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const { id } = req.params;
+
+    await prisma.task.deleteMany({
+      where: { projectId: Number(id) },
+    })
+
+    await prisma.project.delete({
+      where: { id: Number(id) },
+    });
+    
+    return res.json({ message: "Project deleted successfully" });
+
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to delete project", error });
+  }
+}

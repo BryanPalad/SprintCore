@@ -1,21 +1,21 @@
-import { useLogoutMutation } from "../auth/hooks/useLogoutMutation";
+import { ActivityFeed } from "@/features/dashboard/blocks/DashboardView/components/ActivityFeed";
+import { ProjectProgress } from "@/features/dashboard/blocks/DashboardView/components/ProjectProgress";
+import { SprintKanban } from "@/features/dashboard/blocks/DashboardView/components/SprintKanban";
+import { SummaryCardsGrid } from "@/features/dashboard/blocks/DashboardView/components/SummaryCardsGrid";
+import { WelcomeBanner } from "@/features/dashboard/blocks/DashboardView/components/WelcomeBanner";
 
-export function DashboardView() {
-  const logoutMutation = useLogoutMutation();
-
+export const DashboardView = () => {
   return (
-    <main className="stitch-surface min-h-screen p-8">
-      <div className="mx-auto max-w-5xl rounded-2xl border border-border bg-white/70 p-8">
-        <h1 className="text-3xl font-semibold text-foreground">Dashboard</h1>
-        <p className="mt-2 text-[#464555]">You are signed in.</p>
-        <button
-          onClick={() => logoutMutation.mutate()}
-          disabled={logoutMutation.isPending}
-          className="cursor-pointer mt-4 rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-600"
-        >
-          {logoutMutation.isPending ? "Signing out..." : "Logout"}
-        </button>
+    <>
+      <WelcomeBanner />
+      <SummaryCardsGrid />
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
+        <div className="space-y-5 xl:col-span-2">
+          <ProjectProgress />
+          <SprintKanban />
+        </div>
+        <ActivityFeed />
       </div>
-    </main>
+    </>
   );
-}
+};

@@ -17,8 +17,6 @@ export function useLogoutMutation() {
         null,
       );
 
-      toast.success("Successfully signed out");
-
       navigate("/login", {
         replace: true,
       });

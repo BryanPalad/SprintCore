@@ -1,13 +1,22 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.js";
 import projectRoutes from "./routes/project.routes.js";
 import taskRoutes from "./routes/task.routes.js";
 
 const app = express();
 
-app.use(cors());
+const corsOrigin = process.env.CLIENT_URL ?? "http://localhost:3000";
+
+app.use(
+  cors({
+    origin: corsOrigin,
+    credentials: true,
+  }),
+);
 app.use(express.json());
+app.use(cookieParser());
 
 app.get("/api/health", (req,res) => {
     res.json({ message: "API is working "})

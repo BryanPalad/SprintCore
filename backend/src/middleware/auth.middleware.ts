@@ -8,6 +8,9 @@ type JwtUserPayload = {
 
 export type AuthRequest = Request & {
   user?: JwtUserPayload;
+  cookies: {
+    accessToken?: string;
+  };
 };
 
 export const authMiddleware = (
@@ -16,12 +19,15 @@ export const authMiddleware = (
   next: NextFunction
 ) => {
   const authHeader = req.headers.authorization;
+  const cookieToken = req.cookies?.accessToken;
 
-  if (!authHeader?.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "No token provided" });
+  let token: string | undefined;
+
+  if (cookieToken) {
+    token = cookieToken;
+  } else if (authHeader?.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
   }
-
-  const token = authHeader.split(" ")[1];
 
   if (!token) {
     return res.status(401).json({ message: "No token provided" });
@@ -34,7 +40,7 @@ export const authMiddleware = (
   }
 
   try {
-    const decoded = jwt.verify(token, jwtSecret) as unknown as JwtUserPayload;
+    const decoded = jwt.verify(token, jwtSecret) as JwtUserPayload;
 
     req.user = decoded;
     next();

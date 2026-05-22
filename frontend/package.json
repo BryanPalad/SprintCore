@@ -26,6 +26,7 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.75.0",
+    "react-hot-toast": "^2.6.0",
     "react-router-dom": "^7.15.0",
     "shadcn": "^4.7.0",
     "tailwind-merge": "^3.5.0",
@@ -34,9 +35,9 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^5.1.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
+    "@vitejs/plugin-react": "^5.1.0",
     "eslint": "^10.3.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.1.1",

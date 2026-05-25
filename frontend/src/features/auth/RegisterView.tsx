@@ -1,10 +1,59 @@
-import { Link } from "react-router-dom";
-import { registerFeatures, registerSocialProviders } from "@/features/auth/data";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  registerFeatures,
+  registerSocialProviders,
+} from "@/features/auth/data";
 import { SocialButton } from "@/features/auth/components/SocialButton";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signUpSchema, type SignUpFormData } from "./validation";
+import { useForm } from "react-hook-form";
+import { useToast } from "@/hooks/useToast";
+import { useRegisterMutation } from "./hooks/useRegisterMutation";
+import { Lock, Mail } from "lucide-react";
+import axios from "axios";
 
 export function RegisterView() {
+  const navigate = useNavigate();
+  const toast = useToast();
+  const registerMutation = useRegisterMutation();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignUpFormData>({
+    resolver: zodResolver(signUpSchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
+  });
+
+  const onSubmit = (data: SignUpFormData) => {
+    const registerPayload = {
+      name: data.name,
+      email: data.email,
+      password: data.password,
+    };
+
+    registerMutation.mutate(registerPayload, {
+      onSuccess: () => {
+        toast.success("Account created successfully! Please log in.");
+        navigate("/login");
+      },
+      onError: (error) => {
+        if (axios.isAxiosError<{ message?: string }>(error)) {
+          toast.error(error.response?.data?.message ?? "An error occurred during registration.");
+          return;
+        }
+
+        toast.error("Something went wrong");
+      },
+    })
+
+    console.log("Form Data:", data);
+  };
+
   return (
     <main className="min-h-screen overflow-x-hidden bg-[#fcf8ff] text-[#1b1b24]">
       <div className="flex min-h-screen">
@@ -12,14 +61,22 @@ export function RegisterView() {
           <div className="register-mobile-glow pointer-events-none absolute inset-0 opacity-10 lg:hidden" />
           <div className="glass-card w-full max-w-md rounded-xl border border-white/40 p-8 shadow-2xl shadow-brand-primary/5">
             <div className="mb-8 text-center">
-              <h1 className="mb-1 text-3xl font-black text-brand-primary">SprintCore</h1>
-              <p className="text-base text-[#464555]">Accelerate your engineering workflow</p>
+              <h1 className="mb-1 text-3xl font-black text-brand-primary">
+                SprintCore
+              </h1>
+              <p className="text-base text-[#464555]">
+                Accelerate your engineering workflow
+              </p>
             </div>
 
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 {registerSocialProviders.map((provider) => (
-                  <SocialButton key={provider.name} provider={provider} variant="register" />
+                  <SocialButton
+                    key={provider.name}
+                    provider={provider}
+                    variant="register"
+                  />
                 ))}
               </div>
 
@@ -31,46 +88,148 @@ export function RegisterView() {
                 <div className="h-px grow bg-[#c7c4d8]/50" />
               </div>
 
-              <form className="space-y-4">
-                <Field label="Full Name" id="register-name" icon="person" placeholder="John Doe" type="text" />
-                <Field
-                  label="Work Email"
-                  id="register-email"
-                  icon="mail"
-                  placeholder="john@company.com"
-                  type="email"
-                />
-                <Field
-                  label="Password"
-                  id="register-password"
-                  icon="lock"
-                  placeholder="Min. 8 characters"
-                  isPassword
-                />
-
-                <div className="flex items-start gap-3 pt-1">
-                  <input
-                    className="mt-1 rounded border-[#c7c4d8] text-brand-primary focus:ring-brand-primary"
-                    id="terms"
-                    type="checkbox"
-                  />
-                  <label className="text-sm leading-tight text-[#464555]" htmlFor="terms">
-                    I agree to the <a className="text-brand-primary hover:underline" href="#">Terms of Service</a> and{" "}
-                    <a className="text-brand-primary hover:underline" href="#">Privacy Policy</a>.
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                <div className="space-y-4">
+                  <label
+                    className="ml-1 block text-sm font-medium tracking-[0.02em] text-[#464555]"
+                    htmlFor="signup-name"
+                  >
+                    Full Name
                   </label>
+                  <Input
+                    aria-invalid={Boolean(errors.name)}
+                    id="signup-name"
+                    leftIcon={<Mail className="h-4 w-4" />}
+                    placeholder="John Doe"
+                    type="text"
+                    {...register("name")}
+                  />
+                  {errors.name?.message ? (
+                    <p className="text-sm font-medium text-red-600">
+                      {errors.name.message}
+                    </p>
+                  ) : null}
+                </div>
+                <div className="space-y-4">
+                  <label
+                    className="ml-1 block text-sm font-medium tracking-[0.02em] text-[#464555]"
+                    htmlFor="signup-email"
+                  >
+                    Email Address
+                  </label>
+                  <Input
+                    aria-invalid={Boolean(errors.email)}
+                    id="signup-email"
+                    leftIcon={<Mail className="h-4 w-4" />}
+                    placeholder="name@company.com"
+                    type="email"
+                    {...register("email")}
+                  />
+                  {errors.email?.message ? (
+                    <p className="text-sm font-medium text-red-600">
+                      {errors.email.message}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="space-y-4">
+                  <label
+                    className="ml-1 block text-sm font-medium tracking-[0.02em] text-[#464555]"
+                    htmlFor="signup-password"
+                  >
+                    Password
+                  </label>
+                  <PasswordInput
+                    aria-invalid={Boolean(errors.password)}
+                    id="signup-password"
+                    leftIcon={<Lock className="h-4 w-4" />}
+                    placeholder="●●●●●●●●●●"
+                    {...register("password")}
+                  />
+                  {errors.password?.message ? (
+                    <p className="text-sm font-medium text-red-600">
+                      {errors.password.message}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="space-y-4">
+                  <label
+                    className="ml-1 block text-sm font-medium tracking-[0.02em] text-[#464555]"
+                    htmlFor="signup-confirm-password"
+                  >
+                    Confirm Password
+                  </label>
+                  <PasswordInput
+                    aria-invalid={Boolean(errors.confirmPassword)}
+                    id="signup-confirm-password"
+                    leftIcon={<Lock className="h-4 w-4" />}
+                    placeholder="●●●●●●●●●●"
+                    {...register("confirmPassword")}
+                  />
+                  {errors.confirmPassword?.message ? (
+                    <p className="text-sm font-medium text-red-600">
+                      {errors.confirmPassword.message}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="space-y-2 pt-1">
+                  <div className="flex items-start gap-3">
+                    <input
+                      id="terms"
+                      type="checkbox"
+                      aria-invalid={Boolean(errors.termsAndPrivacyPolicy)}
+                      className="mt-1 rounded border-[#c7c4d8] text-brand-primary focus:ring-brand-primary"
+                      {...register("termsAndPrivacyPolicy")}
+                    />
+
+                    <label
+                      htmlFor="terms"
+                      className="text-sm leading-tight text-[#464555]"
+                    >
+                      I agree to the{" "}
+                      <a
+                        href="#"
+                        className="font-medium text-brand-primary hover:underline"
+                      >
+                        Terms of Service
+                      </a>{" "}
+                      and{" "}
+                      <a
+                        href="#"
+                        className="font-medium text-brand-primary hover:underline"
+                      >
+                        Privacy Policy
+                      </a>
+                      .
+                    </label>
+                  </div>
+
+                  {errors.termsAndPrivacyPolicy?.message ? (
+                    <p className="text-sm font-medium text-red-600">
+                      {errors.termsAndPrivacyPolicy.message}
+                    </p>
+                  ) : null}
                 </div>
 
                 <button
-                  className="mt-4 w-full rounded-lg bg-gradient-to-r from-brand-primary to-brand-secondary px-6 py-3 text-base font-semibold text-white shadow-lg shadow-brand-primary/20 transition-all duration-200 hover:scale-[1.02] active:scale-95"
+                  className="w-full rounded-xl bg-gradient-to-r from-brand-primary to-brand-tertiary py-4 text-sm font-bold tracking-[0.02em] text-white shadow-lg shadow-brand-primary/20 transition-all duration-200 hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
+                  disabled={registerMutation.isPending}
                   type="submit"
                 >
-                  Create Account
+                  {registerMutation.isPending
+                    ? "Creating account..."
+                    : "Create Account"}
                 </button>
               </form>
 
               <p className="pt-4 text-center text-base text-[#464555]">
                 Already have an account?{" "}
-                <Link className="font-bold text-brand-primary hover:underline" to="/login">
+                <Link
+                  className="font-bold text-brand-primary hover:underline"
+                  to="/login"
+                >
                   Log in
                 </Link>
               </p>
@@ -91,8 +250,9 @@ export function RegisterView() {
                 The engine behind high-performance teams.
               </h2>
               <p className="text-lg text-white/80">
-                Experience the next generation of project management. Built for engineers, by
-                engineers, with glassmorphic clarity and precision control.
+                Experience the next generation of project management. Built for
+                engineers, by engineers, with glassmorphic clarity and precision
+                control.
               </p>
             </div>
 
@@ -102,8 +262,12 @@ export function RegisterView() {
                   key={feature.title}
                   className="glass-card rounded-xl border border-white/20 bg-white/5 p-4"
                 >
-                  <span className="material-symbols-outlined mb-3 text-cyan-300">{feature.icon}</span>
-                  <h4 className="mb-1 text-sm font-semibold">{feature.title}</h4>
+                  <span className="material-symbols-outlined mb-3 text-cyan-300">
+                    {feature.icon}
+                  </span>
+                  <h4 className="mb-1 text-sm font-semibold">
+                    {feature.title}
+                  </h4>
                   <p className="text-sm text-white/60">{feature.copy}</p>
                 </div>
               ))}
@@ -120,11 +284,17 @@ export function RegisterView() {
                 <div className="flex items-center justify-between bg-white/10 p-4 backdrop-blur-md">
                   <div className="flex items-center gap-3">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-primary">
-                      <span className="material-symbols-outlined text-sm text-white">deployed_code</span>
+                      <span className="material-symbols-outlined text-sm text-white">
+                        deployed_code
+                      </span>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-white">System Health</p>
-                      <p className="text-[10px] text-white/60">99.9% Uptime Verified</p>
+                      <p className="text-sm font-medium text-white">
+                        System Health
+                      </p>
+                      <p className="text-[10px] text-white/60">
+                        99.9% Uptime Verified
+                      </p>
                     </div>
                   </div>
                   <div className="flex gap-1">
@@ -138,45 +308,12 @@ export function RegisterView() {
           </div>
 
           <div className="absolute right-10 bottom-10 flex h-32 w-32 rotate-12 items-center justify-center rounded-xl border border-white/20 bg-white/5 backdrop-blur-sm">
-            <span className="material-symbols-outlined text-[64px] text-white/30">token</span>
+            <span className="material-symbols-outlined text-[64px] text-white/30">
+              token
+            </span>
           </div>
         </section>
       </div>
     </main>
-  );
-}
-
-type FieldProps = {
-  label: string;
-  id: string;
-  icon: string;
-  placeholder: string;
-  type?: string;
-  isPassword?: boolean;
-};
-
-function Field({ label, id, icon, placeholder, type = "text", isPassword = false }: FieldProps) {
-  return (
-    <div className="space-y-1">
-      <label className="ml-1 text-sm font-medium tracking-[0.02em] text-[#464555]" htmlFor={id}>
-        {label}
-      </label>
-      {isPassword ? (
-        <PasswordInput
-          className="rounded-lg border-[#c7c4d8] bg-[#f0ecf9]/50 focus:ring-2 focus:ring-brand-primary/20"
-          id={id}
-          leftIcon={<span className="material-symbols-outlined text-[20px]">{icon}</span>}
-          placeholder={placeholder}
-        />
-      ) : (
-        <Input
-          className="rounded-lg border-[#c7c4d8] bg-[#f0ecf9]/50 focus:ring-2 focus:ring-brand-primary/20"
-          id={id}
-          leftIcon={<span className="material-symbols-outlined text-[20px]">{icon}</span>}
-          placeholder={placeholder}
-          type={type}
-        />
-      )}
-    </div>
   );
 }

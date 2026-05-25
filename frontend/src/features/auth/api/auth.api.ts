@@ -1,8 +1,14 @@
 import { api } from "@/lib/api";
-import type { SignInFormData } from "../validation";
+import type { SignInFormData, RegisterPayload as SignUpFormData } from "../validation";
 
 export async function loginUser(data: SignInFormData) {
   const response = await api.post("auth/login", data);
+
+  return response.data;
+}
+
+export async function registerUser(data: SignUpFormData) {
+  const response = await api.post("auth/register", data);
 
   return response.data;
 }

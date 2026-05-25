@@ -1,4 +1,5 @@
 import { bottomNavItems, navItems } from "@/features/dashboard/constants";
+import { useLogoutMutation } from "@/features/auth/hooks/useLogoutMutation";
 import { NavLink } from "react-router-dom";
 
 type DashboardSidebarProps = {
@@ -8,6 +9,16 @@ type DashboardSidebarProps = {
 };
 
 export const DashboardSidebar = ({ isSidebarCollapsed, isSidebarOpen, onNavigate }: DashboardSidebarProps) => {
+  const { mutate: logout, isPending: isLoggingOut } = useLogoutMutation();
+
+  const handleLogout = () => {
+    logout(undefined, {
+      onSuccess: () => {
+        onNavigate?.();
+      },
+    });
+  };
+
   return (
     <aside
       className={[
@@ -76,6 +87,19 @@ export const DashboardSidebar = ({ isSidebarCollapsed, isSidebarOpen, onNavigate
             {!isSidebarCollapsed && <span>{item.label}</span>}
           </button>
         ))}
+
+        <button
+          className={[
+            "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-slate-600 transition-all hover:bg-white/70 hover:text-brand-primary",
+            isSidebarCollapsed ? "justify-center" : "",
+          ].join(" ")}
+          disabled={isLoggingOut}
+          onClick={handleLogout}
+          type="button"
+        >
+          <span className="material-symbols-outlined text-[20px]">logout</span>
+          {!isSidebarCollapsed && <span>Logout</span>}
+        </button>
       </div>
     </aside>
   );

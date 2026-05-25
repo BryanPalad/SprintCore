@@ -1,5 +1,19 @@
+# dependencies
 node_modules
-dist
+
+# env
 .env
 .env.local
+
+# build outputs
+dist
+backend/dist
+frontend/dist
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+frontend/tsconfig.tsbuildinfo
+backend/tsconfig.tsbuildinfo
+
+# coverage
 coverage

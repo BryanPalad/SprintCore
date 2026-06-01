@@ -4,8 +4,10 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.js";
 import projectRoutes from "./routes/project.routes.js";
 import taskRoutes from "./routes/task.routes.js";
+import passport from "./config/passport.js";
 
 const app = express();
+app.use(passport.initialize());
 
 const corsOrigin = process.env.CLIENT_URL ?? "http://localhost:3000";
 
@@ -29,5 +31,6 @@ app.get("/", (_req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/tasks", taskRoutes);
+
 
 export default app;

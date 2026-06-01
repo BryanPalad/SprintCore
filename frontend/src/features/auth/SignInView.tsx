@@ -11,6 +11,7 @@ import { useForm } from "react-hook-form";
 import { signInSchema, type SignInFormData } from "./validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLoginMutation } from "./hooks/useLoginMutation";
+import { getOAuthLoginUrl, type OAuthProvider } from "./api/auth.api";
 
 export function SignInView() {
   const navigate = useNavigate();
@@ -38,6 +39,17 @@ export function SignInView() {
         toast.error("Something went wrong");
       },
     });
+  };
+
+  const handleOAuthSignIn = (providerName: string) => {
+    const provider = providerName.toLowerCase();
+
+    if (provider !== "google" && provider !== "github") {
+      toast.error("Unsupported social provider");
+      return;
+    }
+
+    window.location.assign(getOAuthLoginUrl(provider as OAuthProvider));
   };
 
   return (
@@ -70,6 +82,8 @@ export function SignInView() {
                     key={provider.name}
                     provider={provider}
                     variant="signin"
+                    onClick={() => handleOAuthSignIn(provider.name)}
+                    disabled={loginMutation.isPending}
                   />
                 ))}
               </div>

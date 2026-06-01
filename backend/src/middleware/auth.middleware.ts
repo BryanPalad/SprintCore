@@ -1,4 +1,4 @@
-import type { Request, Response, NextFunction } from "express";
+import type { Request, RequestHandler } from "express";
 import jwt from "jsonwebtoken";
 
 type JwtUserPayload = {
@@ -6,18 +6,20 @@ type JwtUserPayload = {
   email: string;
 };
 
+declare module "express-serve-static-core" {
+  interface Request {
+    user?: JwtUserPayload | undefined;
+  }
+}
+
 export type AuthRequest = Request & {
-  user?: JwtUserPayload;
+  user?: JwtUserPayload | undefined;
   cookies: {
-    accessToken?: string;
+    accessToken?: string | undefined;
   };
 };
 
-export const authMiddleware = (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-) => {
+export const authMiddleware: RequestHandler = (req, res, next) => {
   const authHeader = req.headers.authorization;
   const cookieToken = req.cookies?.accessToken;
 
@@ -41,8 +43,7 @@ export const authMiddleware = (
 
   try {
     const decoded = jwt.verify(token, jwtSecret) as JwtUserPayload;
-
-    req.user = decoded;
+    (req as AuthRequest).user = decoded;
     next();
   } catch {
     return res.status(401).json({ message: "Invalid or expired token" });

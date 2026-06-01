@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/useToast";
 import { useRegisterMutation } from "./hooks/useRegisterMutation";
 import { Lock, Mail } from "lucide-react";
 import axios from "axios";
+import { getOAuthLoginUrl, type OAuthProvider } from "./api/auth.api";
 
 export function RegisterView() {
   const navigate = useNavigate();
@@ -49,9 +50,18 @@ export function RegisterView() {
 
         toast.error("Something went wrong");
       },
-    })
+    });
+  };
 
-    console.log("Form Data:", data);
+  const handleOAuthRegistration = (providerName: string) => {
+    const provider = providerName.toLowerCase();
+
+    if (provider !== "google" && provider !== "github") {
+      toast.error("Unsupported social provider");
+      return;
+    }
+
+    window.location.assign(getOAuthLoginUrl(provider as OAuthProvider));
   };
 
   return (
@@ -76,6 +86,8 @@ export function RegisterView() {
                     key={provider.name}
                     provider={provider}
                     variant="register"
+                    onClick={() => handleOAuthRegistration(provider.name)}
+                    disabled={registerMutation.isPending}
                   />
                 ))}
               </div>

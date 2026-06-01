@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { RegisterView } from "@/features/auth/RegisterView";
 import { SignInView } from "@/features/auth/SignInView";
+import { OAuthCallbackView } from "@/features/auth/OAuthCallbackView";
 import { BacklogView } from "@/features/dashboard/BacklogView";
 import { DashboardLayout } from "@/features/dashboard/DashboardLayout";
 import { DashboardView } from "@/features/dashboard/DashboardView";
@@ -21,6 +22,10 @@ export const router = createBrowserRouter([
   {
     path: "/register",
     element: <RegisterView />,
+  },
+  {
+    path: "/oauth/callback",
+    element: <OAuthCallbackView />,
   },
   {
     // All children here require a valid cookie-backed session.

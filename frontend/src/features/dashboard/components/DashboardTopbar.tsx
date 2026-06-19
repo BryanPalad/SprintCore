@@ -1,3 +1,5 @@
+import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
+
 type DashboardTopbarProps = {
   isSidebarCollapsed: boolean;
   onToggleMobileSidebar: () => void;
@@ -9,6 +11,12 @@ export const DashboardTopbar = ({
   onToggleMobileSidebar,
   onToggleCollapsedSidebar,
 }: DashboardTopbarProps) => {
+  const { data: currentUser } = useCurrentUser();
+
+  if (!currentUser) {
+    return null;
+  }
+
   return (
     <header className="sticky top-4 z-30 mb-7 flex items-center justify-between gap-3 rounded-2xl border border-white/35 bg-white/75 px-4 py-3 shadow-lg shadow-brand-primary/10 backdrop-blur-xl sm:px-5">
       <div className="flex items-center gap-2 sm:gap-3">
@@ -54,9 +62,9 @@ export const DashboardTopbar = ({
           <img
             alt="User avatar"
             className="h-8 w-8 rounded-full border border-brand-primary/30"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDbB0YdyNk_c8TNddzbajhK0BQyQ2-dtJFkdxSN0SUdqrf3n1WNCo8K7Gh0BppeXs8ZHLo_hYent3lexAHFw7qGzkI99H1AG4q3Ch1KfBDV6ef6x6QZUGo0Q7h7004n30zOZcIeyFoDWn7tE0DhfEPUeGPOhOwvcoqsbAea1CmNZsZMBoc2wzzJyI0iZmOfHxe-tO0FTTMm0nkEkfm4nBrsyhEWtQ6Q7aTDf4QATMpbxE_wsaJ28J8rUKhECKVC0BlCPTLdNy4oul4"
+            src={currentUser.user.avatarUrl ?? ""}
           />
-          <span className="hidden text-sm font-semibold text-brand-primary sm:inline">Dev_Sprint</span>
+          <span className="hidden text-sm font-semibold text-brand-primary sm:inline">{currentUser.user.name}</span>
         </button>
       </div>
     </header>

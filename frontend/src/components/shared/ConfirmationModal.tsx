@@ -31,7 +31,7 @@ export function ConfirmationModal({
 
         <div className="mt-6 flex justify-end gap-3">
           <button
-            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-[#464555] transition hover:bg-[#f5f2ff]"
+            className="cursor-pointer rounded-lg border border-border px-4 py-2 text-sm font-medium text-[#464555] transition hover:bg-[#f5f2ff]"
             disabled={isConfirming}
             onClick={onCancel}
             type="button"
@@ -39,7 +39,7 @@ export function ConfirmationModal({
             {cancelLabel}
           </button>
           <button
-            className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-70"
+            className="cursor-pointer rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-70"
             disabled={isConfirming}
             onClick={onConfirm}
             type="button"

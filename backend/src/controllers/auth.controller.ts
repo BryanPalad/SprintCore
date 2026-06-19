@@ -130,6 +130,7 @@ export const me = async (req: AuthRequest, res: Response) => {
         name: true,
         email: true,
         createdAt: true,
+        avatarUrl: true,
       },
     });
 
